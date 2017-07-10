@@ -6,16 +6,12 @@ class Env(object):
     An environment take a given action and return a state and a reward.
     """
 
-    def __init__(self, baseline, p=3):
+    def __init__(self, baseline, action_space, p=3):
         self.baseline = baseline
+        self.action_space = action_space
         self.p = p
         self.beta = np.array([0.40, 0.25, 0.35, 0.65, 0.10, 0.50, 0.22, 600,
                               0.15, 0.20, 0.32, 0.10, 0.45, 1.50])
-        sigma1 = np.array([[1, 0.3, -0.3], [0.3, 1, -0.3], [-0.3, -0.3, 1]])
-        self.sigma = np.pad(sigma1, ((0, p - 3), (0, p - 3)), 'constant',
-                            constant_values=0)
-        for i in range(3, p):
-            self.sigma[i, i] += 1
 
     def step(self, state, action):
         b, beta = self.baseline, self.beta
@@ -55,7 +51,14 @@ class Env(object):
         return s, r
 
     def reset(self):
-        state = np.random.multivariate_normal(np.zeros(self.p), self.sigma)
-        state = np.tile(state, (self.baseline.shape[0], 1))
-        reward = np.zeros(self.baseline.shape)
+        N, b, beta = self.baseline.shape[0], self.baseline, self.beta
+        SIGMA = np.identity(self.p)
+        SIGMA_1 = np.array([[1, 0.3, -0.3], [0.3, 1, -0.3], [-0.3, -0.3, 1]])
+        SIGMA[:3, :3] = SIGMA_1
+        rho = np.random.normal(0, 0.01, N)
+        state = np.random.multivariate_normal(np.zeros(self.p), SIGMA, N)
+        action = np.random.choice(self.action_space, N)
+        reward = beta[7] * (b + action * (beta[8] + beta[9] * state[:, 0] +
+                            beta[10] * state[:, 1]) + beta[11] * state[:, 0] -
+                            beta[12] * state[:, 2] + rho)
         return state, reward
