@@ -24,10 +24,15 @@ class Agent(object):
     def train(self, env, nb_steps=210):
         state, reward = env.reset()
         action = self.forward(state, reward)
-        history = [(state, action, reward)]
+        history = np.hstack((state,
+                             action[:, np.newaxis],
+                             reward[:, np.newaxis]))[:, np.newaxis, :]
         while self.step < nb_steps:
             state, reward = env.step(state, action)
             action = self.forward(state, reward)
-            history.append((state, action, reward))
+            episode = np.hstack((state,
+                                 action[:, np.newaxis],
+                                 reward[:, np.newaxis]))[:, np.newaxis, :]
+            history = np.concatenate((history, episode), axis=1)
             self.step += 1
         return history
