@@ -13,9 +13,10 @@ class Agent(object):
         self.step = 0
 
     def forward(self, state, reward):
-        action = None
+        action = np.zeros(state.shape[0], )
         if self.random_policy:
-            action = np.random.choice(action_space)
+            for i in range(state.shape[0]):
+                action[i] = np.random.choice(self.action_space)
         else:
             pass
         return action
@@ -28,4 +29,5 @@ class Agent(object):
             state, reward = env.step(state, action)
             action = self.forward(state, reward)
             history.append((state, action, reward))
+            self.step += 1
         return history

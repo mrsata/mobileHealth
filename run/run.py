@@ -1,9 +1,11 @@
+from __future__ import print_function
 import numpy as np
 from src.agent import Agent
 from src.env import Env
 
 np.random.seed(0)
 action_space = [0, 1]
+
 
 def generate_baseline(n=40):
     psi = np.array([0.065, 0.145, -0.495])
@@ -15,8 +17,11 @@ def generate_baseline(n=40):
     return b
 
 baseline = generate_baseline()
-env = Env()
-print(env.sigma)
-
-env = Env(4)
-print(env.sigma)
+env = Env(baseline)
+# print(env.reset())
+agent = Agent(action_space=action_space)
+history = agent.train(env, nb_steps=10)
+for i in range(len(history)):
+    print("history #{}: ".format(i))
+    print(history[i])
+    print("*" * 10)
