@@ -15,8 +15,7 @@ class Agent(object):
     def forward(self, state, reward):
         action = np.zeros(state.shape[0], )
         if self.random_policy:
-            for i in range(state.shape[0]):
-                action[i] = np.random.choice(self.action_space)
+            action = np.random.choice(self.action_space, state.shape[0])
         else:
             pass
         return action
