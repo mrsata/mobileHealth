@@ -22,6 +22,7 @@ env = Env(baseline)
 agent = Agent(action_space=action_space)
 history = agent.train(env, nb_steps=10)
 for i in range(len(history)):
-    print("history #{}: ".format(i))
-    print(history[i])
-    print("*" * 10)
+    print("user #{}: ".format(i))
+    for j in range(len(history[i])):
+        print(', '.join(map(str, history[i, j])))
+    print("*" * 79)
