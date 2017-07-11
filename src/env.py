@@ -14,7 +14,7 @@ class Env(object):
         self.p = p
         beta = np.array([0.40, 0.25, 0.35, 0.65, 0.10, 0.50, 0.22, 600, 0.15,
                          0.20, 0.32, 0.10, 0.45])
-        sigma_beta = 1e-2
+        sigma_beta = 5e-2
         delta = np.random.multivariate_normal(np.zeros(self.p, ),
                                               np.identity(self.p) * sigma_beta,
                                               self.baseline.shape[0])
@@ -22,7 +22,7 @@ class Env(object):
 
     def step(self, state, action):
         b, beta = self.baseline, self.beta
-        sigma_s, sigma_r = 1e-2, 1e-2
+        sigma_s, sigma_r = 0.5, 1
         xi = np.random.multivariate_normal(np.zeros(self.p, ),
                                            np.identity(self.p) * sigma_s)
         rho = np.random.normal(0, sigma_r)
@@ -41,7 +41,7 @@ class Env(object):
 
     def step_one(self, state, action, user_idx):
         b, beta = self.baseline, self.beta
-        sigma_s, sigma_r = 1e-2, 1e-2
+        sigma_s, sigma_r = 0.5, 1
         xi = np.random.multivariate_normal(np.zeros(self.p, ),
                                            np.identity(self.p) * sigma_s)
         rho = np.random.normal(0, sigma_r)
@@ -67,7 +67,7 @@ class Env(object):
         SIGMA = np.identity(self.p)
         SIGMA_1 = np.array([[1, 0.3, -0.3], [0.3, 1, -0.3], [-0.3, -0.3, 1]])
         SIGMA[:3, :3] = SIGMA_1
-        sigma_r = 1e-2
+        sigma_r = 1
         rho = np.random.normal(0, sigma_r, N)
         state = np.random.multivariate_normal(np.zeros(self.p), SIGMA, N)
         state = np.maximum(0, state)
