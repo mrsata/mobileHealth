@@ -15,10 +15,11 @@ class Env(object):
         beta = np.array([0.40, 0.25, 0.35, 0.65, 0.10, 0.50, 0.22, 600, 0.15,
                          0.20, 0.32, 0.10, 0.45])
         sigma_beta = 5e-2
-        delta = np.random.multivariate_normal(np.zeros(self.p, ),
-                                              np.identity(self.p) * sigma_beta,
+        delta = np.random.multivariate_normal(np.zeros(beta.shape[0], ),
+                                              np.identity(beta.shape[0]) *
+                                              sigma_beta,
                                               self.baseline.shape[0])
-        self.beta = np.tile(beta, (self.baseline.shape[0], 1))
+        self.beta = np.tile(beta, (self.baseline.shape[0], 1)) + delta
 
     def step(self, state, action):
         b, beta = self.baseline, self.beta
