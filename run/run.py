@@ -3,9 +3,6 @@ import numpy as np
 from src.agent import Agent
 from src.env import Env
 
-np.random.seed(0)
-action_space = [0, 1]
-
 
 def generate_baseline(n=40):
     psi = np.array([0.065, 0.145, -0.495])
@@ -16,13 +13,21 @@ def generate_baseline(n=40):
     b = z.dot(psi)
     return b
 
+np.random.seed(0)
+action_space = [0, 1]
 baseline = generate_baseline()
-env = Env(baseline)
+env = Env(baseline, action_space)
 # print(env.reset())
-agent = Agent(action_space=action_space)
-history = agent.train(env, nb_steps=10)
-for i in range(len(history)):
-    print("user #{}: ".format(i))
-    for j in range(len(history[i])):
-        print(', '.join(map(str, history[i, j])))
-    print("*" * 79)
+agent = Agent(action_space)
+wst = agent.warmup(env, nb_steps=50)
+# print(wst.shape)
+
+def print_transit(transits):
+    for i in range(len(transits)):
+        print("user #{}: ".format(i))
+        for j in range(len(transits[i])):
+            print(', '.join(map(str, transits[i, j])))
+        print("*" * 79)
+
+history = agent.fit(env, nb_steps=100, wst=wst)
+print_transit(history)
