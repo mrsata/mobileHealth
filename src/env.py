@@ -8,21 +8,22 @@ class Env(object):
     Generates inital states and rewards by calling reset() function.
     """
 
-    def __init__(self, baseline, action_space, p=3):
+    def __init__(self, baseline, p=3):
         self.baseline = baseline
-        self.action_space = action_space
+        self.nb_users = baseline.shape[0]
+        self.action_space = np.tile(np.array([0, 1]), (self.nb_users, 1))
         self.p = p
         beta = np.array([0.40, 0.25, 0.35, 0.65, 0.10, 0.50, 0.22, 600, 0.15,
                          0.20, 0.32, 0.10, 0.45])
         sigma_beta = 5e-2
         delta = np.random.multivariate_normal(np.zeros(beta.shape[0], ),
                                               np.identity(beta.shape[0]) *
-                                              sigma_beta,
-                                              self.baseline.shape[0])
-        self.beta = np.tile(beta, (self.baseline.shape[0], 1)) + delta
+                                              sigma_beta, self.nb_users)
+        self.beta = np.tile(beta, (self.nb_users, 1)) + delta
 
     def step(self, state, action):
         b, beta = self.baseline, self.beta
+        action = self.action_space[range(self.nb_users), action]
         sigma_s, sigma_r = 0.5, 1
         xi = np.random.multivariate_normal(np.zeros(self.p, ),
                                            np.identity(self.p) * sigma_s)
@@ -43,7 +44,7 @@ class Env(object):
         return s_new, reward
 
     def reset(self):
-        N, b, beta = self.baseline.shape[0], self.baseline, self.beta
+        N, b, beta = self.nb_users, self.baseline, self.beta
         SIGMA = np.identity(self.p)
         SIGMA_1 = np.array([[1, 0.3, -0.3], [0.3, 1, -0.3], [-0.3, -0.3, 1]])
         SIGMA[:3, :3] = SIGMA_1
