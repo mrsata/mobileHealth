@@ -19,7 +19,6 @@ class Agent(object):
 
     def forward(self, state):
         q_values = self.model.predict(state, batch_size=self.nb_users)
-        q_values = np.array(q_values).reshape(self.nb_users, self.nb_actions)
         action = np.argmax(q_values, axis=1)
         mask = np.random.sample(size=action.shape[0]) < self.eps
         action[mask] = np.random.randint(self.nb_actions,
@@ -30,16 +29,15 @@ class Agent(object):
         replay = self.memory.reshape(-1, self.memory.shape[-1])
         mask = np.random.randint(replay.shape[0], size=batch_size)
         minibatch = replay[mask, :]
-        for batch in minibatch:
-            state = batch[:self.state_size]
-            action = int(batch[self.state_size])
-            reward = batch[self.state_size + 1]
-            s_new = batch[-self.state_size:]
-            target = reward + self.gamma * \
-                np.amax(self.model.predict(s_new[np.newaxis, :])[0])
-            target_f = self.model.predict(state[np.newaxis, :])
-            target_f[0][action] = target
-            self.model.fit(state[np.newaxis, :], target_f, epochs=1, verbose=0)
+        state = minibatch[:, :self.state_size]
+        action = minibatch[:, self.state_size].astype(int)
+        reward = minibatch[:, self.state_size + 1]
+        s_new = minibatch[:, -self.state_size:]
+        target = reward + self.gamma * \
+            np.amax(self.model.predict(s_new, batch_size=batch_size)[0])
+        target_f = self.model.predict(state, batch_size=batch_size)
+        target_f[range(batch_size), action] = target
+        self.model.fit(state, target_f, epochs=1, verbose=0, batch_size=batch_size)
 
     def warmup(self, env, nb_steps=50):
         state = env.reset()
