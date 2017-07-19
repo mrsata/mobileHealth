@@ -21,7 +21,7 @@ def generate_baseline(nb_users):
     return b
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--nb-steps', type=int, default=100)
+parser.add_argument('--nb-steps', type=int, default=1000)
 parser.add_argument('--weights', type=str, default=None)
 args = parser.parse_args()
 
@@ -40,13 +40,14 @@ model.add(Dense(6, activation='relu'))
 model.add(Dense(4, activation='relu'))
 model.add(Dense(nb_actions, activation='linear'))
 model.compile(loss='mse', optimizer=Adam(lr=learning_rate))
-print(model.summary())
+model.summary()
 
 agent = Agent(model=model, nb_users=nb_users, nb_actions=nb_actions,
               state_size=state_size, gamma=.99)
 agent.warmup(env, nb_steps=50)
 import time
 t = time.time()
+print("Start training: ")
 history = agent.fit(env, nb_steps=nb_steps)
 print("time:", time.time() - t)
 
@@ -60,3 +61,6 @@ with open('data/history_{}'.format(nb_steps), 'w') as f:
         for j in range(len(history[i])):
             f.write(', '.join(map(str, history[i, j, :5])) + '\n')
         f.write("*" * 79 + '\n')
+
+print("Start testing: ")
+agent.test(env, nb_steps=5000)
