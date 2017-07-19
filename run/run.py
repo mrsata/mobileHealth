@@ -45,7 +45,10 @@ print(model.summary())
 agent = Agent(model=model, nb_users=nb_users, nb_actions=nb_actions,
               state_size=state_size, gamma=.99)
 agent.warmup(env, nb_steps=50)
+import time
+t = time.time()
 history = agent.fit(env, nb_steps=nb_steps)
+print("time:", time.time() - t)
 
 item_size = history.shape[-1]
 for i in range(nb_steps / 20, nb_steps + 1, nb_steps / 20):

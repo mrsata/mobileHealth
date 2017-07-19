@@ -18,9 +18,7 @@ class Agent(object):
         self.memory = None
 
     def forward(self, state):
-        q_values = []
-        for s in state:
-            q_values.append(self.model.predict(s[np.newaxis, :]))
+        q_values = self.model.predict(state, batch_size=self.nb_users)
         q_values = np.array(q_values).reshape(self.nb_users, self.nb_actions)
         action = np.argmax(q_values, axis=1)
         mask = np.random.sample(size=action.shape[0]) < self.eps
