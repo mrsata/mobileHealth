@@ -78,6 +78,9 @@ class Agent(object):
         action = self.forward(s_new)
         state = s_new
         step = 1
+        checkpoint = 0
+        import time
+        t = time.time()
         try:
             while step < nb_steps:
                 s_new, reward = env.step(state, action)
@@ -90,7 +93,11 @@ class Agent(object):
                 state = s_new
                 step += 1
                 self.backward(32)
-                print step
+                if step == checkpoint + nb_steps / 20:
+                    tmp = time.time()
+                    print step, tmp - t
+                    t = tmp
+                    checkpoint = step
         except KeyboardInterrupt:
             pass
         return self.memory

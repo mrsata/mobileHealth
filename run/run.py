@@ -54,7 +54,7 @@ item_size = history.shape[-1]
 for i in range(nb_steps / 20, nb_steps + 1, nb_steps / 20):
     print(i, np.average(history[:, :i, :].reshape(-1, item_size), axis=0)[4])
 
-with open('data/history', 'w') as f:
+with open('data/history_{}'.format(nb_steps), 'w') as f:
     for i in range(len(history)):
         f.write("user #{}: \n".format(i))
         for j in range(len(history[i])):
