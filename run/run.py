@@ -1,4 +1,5 @@
 from __future__ import print_function
+import argparse
 
 import numpy as np
 
@@ -19,7 +20,13 @@ def generate_baseline(nb_users):
     b = z.dot(psi)
     return b
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--nb-steps', type=int, default=100)
+parser.add_argument('--weights', type=str, default=None)
+args = parser.parse_args()
+
 np.random.seed(0)
+nb_steps = args.nb_steps
 nb_users = 40
 state_size = 3
 learning_rate = 1e-2
@@ -38,16 +45,11 @@ print(model.summary())
 agent = Agent(model=model, nb_users=nb_users, nb_actions=nb_actions,
               state_size=state_size, gamma=.99)
 agent.warmup(env, nb_steps=50)
-history = agent.fit(env, nb_steps=100)
+history = agent.fit(env, nb_steps=nb_steps)
 
-agent2 = Agent(model=model, nb_users=nb_users, nb_actions=nb_actions,
-              state_size=state_size, gamma=.99)
-agent2.warmup(env, nb_steps=50)
-history2 = agent.fit(env, nb_steps=200)
-
-print(np.average(history.reshape(-1, history.shape[-1]), axis=0)[4])
-print(np.average(history2.reshape(-1, history2.shape[-1]), axis=0)[4])
-print(np.average(history.reshape(-1, history.shape[-1]), axis=0).shape)
+item_size = history.shape[-1]
+for i in range(nb_steps / 20, nb_steps + 1, nb_steps / 20):
+    print(i, np.average(history[:, :i, :].reshape(-1, item_size), axis=0)[4])
 
 with open('data/history', 'w') as f:
     for i in range(len(history)):
