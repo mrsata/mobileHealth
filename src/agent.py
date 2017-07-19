@@ -14,6 +14,7 @@ class Agent(object):
         self.nb_actions = nb_actions
         self.state_size = state_size
         self.gamma = gamma
+        self.eps = 0.1
         self.memory = None
 
     def forward(self, state):
@@ -22,6 +23,9 @@ class Agent(object):
             q_values.append(self.model.predict(s[np.newaxis, :]))
         q_values = np.array(q_values).reshape(self.nb_users, self.nb_actions)
         action = np.argmax(q_values, axis=1)
+        mask = np.random.sample(size=action.shape[0]) < self.eps
+        action[mask] = np.random.randint(self.nb_actions,
+                                         size=action[mask].shape[0])
         return action
 
     def backward(self, batch_size):
