@@ -1,6 +1,7 @@
 from __future__ import print_function
 import argparse
-
+import os.path
+import time
 import numpy as np
 
 from keras.models import Sequential
@@ -22,6 +23,7 @@ def generate_baseline(nb_users):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--nb-steps', type=int, default=1000)
+parser.add_argument('--test', type=int, default=0)
 parser.add_argument('--weights', type=str, default=None)
 args = parser.parse_args()
 
@@ -45,22 +47,21 @@ model.summary()
 agent = Agent(model=model, nb_users=nb_users, nb_actions=nb_actions,
               state_size=state_size, gamma=.99)
 agent.warmup(env, nb_steps=50)
-import time
-t = time.time()
 print("Start training: ")
+t = time.time()
 history = agent.fit(env, nb_steps=nb_steps)
-print("time:", time.time() - t)
+print("time: {}s".format(time.time() - t))
 
-item_size = history.shape[-1]
-for i in range(nb_steps / 20, nb_steps + 1, nb_steps / 20):
-    print(i, np.average(history[:, :i, :].reshape(-1, item_size), axis=0)[4])
+file_path = "data/history_{}".format(nb_steps)
+if not os.path.exists(file_path):
+    with open(file_path, 'w') as f:
+        for i in range(len(history)):
+            f.write("user #{}: \n".format(i))
+            for j in range(len(history[i])):
+                f.write(", ".join(map(str, history[i, j, :5])) + "\n")
+            f.write("*" * 79 + '\n')
+            f.close()
 
-with open('data/history_{}'.format(nb_steps), 'w') as f:
-    for i in range(len(history)):
-        f.write("user #{}: \n".format(i))
-        for j in range(len(history[i])):
-            f.write(', '.join(map(str, history[i, j, :5])) + '\n')
-        f.write("*" * 79 + '\n')
-
-print("Start testing: ")
-agent.test(env, nb_steps=5000)
+if args.test > 0:
+    print("Start testing: ")
+    agent.test(env, nb_steps=args.test)

@@ -83,8 +83,6 @@ class Agent(object):
         state = s_new
         step = 1
         checkpoint = 0
-        import time
-        t = time.time()
         try:
             while step < nb_steps:
                 s_new, reward = env.step(state, action)
@@ -99,9 +97,8 @@ class Agent(object):
                 self.backward(32)
                 self.eps = self.eps - 9e-4 if self.eps > .1 else self.eps
                 if step == checkpoint + nb_steps / 20:
-                    tmp = time.time()
-                    print step, tmp - t
-                    t = tmp
+                    print step, np.average(self.memory.reshape(-1,
+                                           self.memory.shape[-1]), axis=0)[4]
                     checkpoint = step
         except KeyboardInterrupt:
             pass
@@ -134,7 +131,7 @@ class Agent(object):
                 state = s_new
                 step += 1
                 if step == checkpoint + nb_steps / 20:
-                    print step, np.average(memory[:, :step, :].reshape(-1,
+                    print step, np.average(memory.reshape(-1,
                                            memory.shape[-1]), axis=0)[4]
                     checkpoint = step
         except KeyboardInterrupt:
