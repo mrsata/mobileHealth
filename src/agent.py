@@ -14,13 +14,15 @@ class Agent(object):
         self.nb_actions = nb_actions
         self.state_size = state_size
         self.gamma = gamma
-        self.eps = 0.1
+        self.eps = 1
         self.memory = None
+        self.training = True
 
     def forward(self, state):
+        eps = self.eps if self.training else .05
         q_values = self.model.predict(state, batch_size=self.nb_users)
         action = np.argmax(q_values, axis=1)
-        mask = np.random.sample(size=action.shape[0]) < self.eps
+        mask = np.random.sample(size=action.shape[0]) < eps
         action[mask] = np.random.randint(self.nb_actions,
                                          size=action[mask].shape[0])
         return action
@@ -64,6 +66,7 @@ class Agent(object):
         return self.memory
 
     def fit(self, env, nb_steps=100):
+        self.training = True
         state, action, reward, step = None, None, None, 0
         state = env.reset()
         action = self.forward(state)
@@ -94,6 +97,7 @@ class Agent(object):
                 state = s_new
                 step += 1
                 self.backward(32)
+                self.eps = self.eps - 9e-4 if self.eps > .1 else self.eps
                 if step == checkpoint + nb_steps / 20:
                     tmp = time.time()
                     print step, tmp - t
@@ -104,6 +108,7 @@ class Agent(object):
         return self.memory
 
     def test(self, env, nb_steps=1000):
+        self.training = False
         state, action, reward, step = None, None, None, 0
         state = env.reset()
         action = self.forward(state)
