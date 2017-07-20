@@ -24,7 +24,7 @@ class Env(object):
     def step(self, state, action):
         b, beta = self.baseline, self.beta
         action = self.action_space[range(self.nb_users), action]
-        sigma_s, sigma_r = 0.5, 1
+        sigma_s, sigma_r = 0.5, 1e-2
         xi = np.random.multivariate_normal(np.zeros(self.p, ),
                                            np.identity(self.p) * sigma_s)
         rho = np.random.normal(0, sigma_r)
