@@ -45,44 +45,6 @@ class Agent(object):
     def warmup(self, env, nb_steps=50):
         state = env.reset()
         action = np.random.randint(self.nb_actions, size=state.shape[0])
-        s_new, reward = env.step(state, action)
-        self.memory = np.hstack((state,
-                                action[:, np.newaxis],
-                                reward[:, np.newaxis],
-                                s_new))[:, np.newaxis, :]
-        action = np.random.randint(self.nb_actions, size=state.shape[0])
-        state = s_new
-        step = 1
-        while step < nb_steps:
-            s_new, reward = env.step(state, action)
-            transit = np.hstack((state,
-                                 action[:, np.newaxis],
-                                 reward[:, np.newaxis],
-                                 s_new))[:, np.newaxis, :]
-            self.memory = np.concatenate((self.memory, transit), axis=1)
-            action = np.random.randint(self.nb_actions, size=state.shape[0])
-            state = s_new
-            step += 1
-        return self.memory
-
-    def fit(self, env, nb_steps=100):
-        self.training = True
-        state, action, reward, step = None, None, None, 0
-        state = env.reset()
-        action = self.forward(state)
-        s_new, reward = env.step(state, action)
-        transit = np.hstack((state,
-                             action[:, np.newaxis],
-                             reward[:, np.newaxis],
-                             s_new))[:, np.newaxis, :]
-        if self.memory is None:
-            self.memory = transit
-        else:
-            self.memory = np.concatenate((self.memory, transit), axis=1)
-        action = self.forward(s_new)
-        state = s_new
-        step = 1
-        checkpoint = 0
         try:
             while step < nb_steps:
                 s_new, reward = env.step(state, action)
@@ -90,7 +52,30 @@ class Agent(object):
                                      action[:, np.newaxis],
                                      reward[:, np.newaxis],
                                      s_new))[:, np.newaxis, :]
-                self.memory = np.concatenate((self.memory, transit), axis=1)
+                self.memory = transit if step == 0 else np.concatenate(
+                    (self.memory, transit), axis=1)
+                action = np.random.randint(self.nb_actions,
+                                           size=state.shape[0])
+                state = s_new
+                step += 1
+        except KeyboardInterrupt:
+            print "Warmup interrupted at step:", step
+        return self.memory
+
+    def fit(self, env, nb_steps=100):
+        self.training = True
+        state, action, reward, step, checkpoint = None, None, None, 0, 0
+        state = env.reset()
+        action = self.forward(state)
+        try:
+            while step < nb_steps:
+                s_new, reward = env.step(state, action)
+                transit = np.hstack((state,
+                                     action[:, np.newaxis],
+                                     reward[:, np.newaxis],
+                                     s_new))[:, np.newaxis, :]
+                self.memory = transit if self.memory is None else \
+                    np.concatenate((self.memory, transit), axis=1)
                 action = self.forward(s_new)
                 state = s_new
                 step += 1
@@ -101,24 +86,14 @@ class Agent(object):
                                            self.memory.shape[-1]), axis=0)[4]
                     checkpoint = step
         except KeyboardInterrupt:
-            pass
+            print "Training interrupted at step:", step
         return self.memory
 
     def test(self, env, nb_steps=1000):
         self.training = False
-        state, action, reward, step = None, None, None, 0
+        state, action, reward, step, checkpoint = None, None, None, 0, 0
         state = env.reset()
         action = self.forward(state)
-        s_new, reward = env.step(state, action)
-        transit = np.hstack((state,
-                             action[:, np.newaxis],
-                             reward[:, np.newaxis],
-                             s_new))[:, np.newaxis, :]
-        memory = transit
-        action = self.forward(s_new)
-        state = s_new
-        step = 1
-        checkpoint = 0
         try:
             while step < nb_steps:
                 s_new, reward = env.step(state, action)
@@ -126,7 +101,8 @@ class Agent(object):
                                      action[:, np.newaxis],
                                      reward[:, np.newaxis],
                                      s_new))[:, np.newaxis, :]
-                memory = np.concatenate((memory, transit), axis=1)
+                memory = transit if step == 0 else np.concatenate((memory,
+                    transit), axis=1)
                 action = self.forward(s_new)
                 state = s_new
                 step += 1
@@ -135,5 +111,5 @@ class Agent(object):
                                            memory.shape[-1]), axis=0)[4]
                     checkpoint = step
         except KeyboardInterrupt:
-            pass
+            print "Testing interrupted at step:", step
         return memory
