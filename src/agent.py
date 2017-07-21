@@ -25,9 +25,11 @@ class Agent(object):
         mask = np.random.sample(size=action.shape[0]) < eps
         action[mask] = np.random.randint(self.nb_actions,
                                          size=action[mask].shape[0])
+        if self.training and self.eps > .1:
+            self.eps = self.eps - 9e-4
         return action
 
-    def backward(self, batch_size):
+    def backward(self, batch_size=32):
         replay = self.memory.reshape(-1, self.memory.shape[-1])
         mask = np.random.randint(replay.shape[0], size=batch_size)
         minibatch = replay[mask, :]
@@ -43,6 +45,7 @@ class Agent(object):
                        batch_size=batch_size)
 
     def warmup(self, env, nb_steps=50):
+        step = 0
         state = env.reset()
         action = np.random.randint(self.nb_actions, size=state.shape[0])
         try:
@@ -64,7 +67,7 @@ class Agent(object):
 
     def fit(self, env, nb_steps=100):
         self.training = True
-        state, action, reward, step, checkpoint = None, None, None, 0, 0
+        step, checkpoint = 0, 0
         state = env.reset()
         action = self.forward(state)
         try:
@@ -79,8 +82,7 @@ class Agent(object):
                 action = self.forward(s_new)
                 state = s_new
                 step += 1
-                self.backward(32)
-                self.eps = self.eps - 9e-4 if self.eps > .1 else self.eps
+                self.backward()
                 if step == checkpoint + nb_steps / 20:
                     print step, np.average(self.memory.reshape(-1,
                                            self.memory.shape[-1]), axis=0)[4]
@@ -91,7 +93,7 @@ class Agent(object):
 
     def test(self, env, nb_steps=1000):
         self.training = False
-        state, action, reward, step, checkpoint = None, None, None, 0, 0
+        step, checkpoint = 0, 0
         state = env.reset()
         action = self.forward(state)
         try:
