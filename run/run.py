@@ -8,7 +8,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 
-from src.agent import Agent
+from src.agents.dqn import DQNAgent
 from src.env import Env
 
 
@@ -44,8 +44,8 @@ model.add(Dense(nb_actions, activation='linear'))
 model.compile(loss='mse', optimizer=Adam(lr=learning_rate))
 model.summary()
 
-agent = Agent(model=model, nb_users=nb_users, nb_actions=nb_actions,
-              state_size=state_size, gamma=.99)
+agent = DQNAgent(model=model, nb_users=nb_users, nb_actions=nb_actions,
+                 state_size=state_size, gamma=.99, eps=1.0, batch_size=32)
 agent.warmup(env, nb_steps=50)
 print("Start training: ")
 t = time.time()
