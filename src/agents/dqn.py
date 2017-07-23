@@ -7,8 +7,10 @@ class DQNAgent(Agent):
 
     """
 
-    def __init__(self, eps=1.0, batch_size=32, **kwargs):
+    def __init__(self, model, gamma=.99, eps=1.0, batch_size=32, **kwargs):
         super(DQNAgent, self).__init__(**kwargs)
+        self.model = model
+        self.gamma = gamma
         self.eps = eps
         self.batch_size = batch_size
 
@@ -35,5 +37,6 @@ class DQNAgent(Agent):
             np.amax(self.model.predict(s_new, batch_size=self.batch_size)[0])
         target_f = self.model.predict(state, batch_size=self.batch_size)
         target_f[range(self.batch_size), action] = target
-        self.model.fit(state, target_f, epochs=1, verbose=0,
-                       batch_size=self.batch_size)
+        history = self.model.fit(state, target_f, epochs=1, verbose=0,
+                                 batch_size=self.batch_size)
+        return history

@@ -6,12 +6,10 @@ class Agent(object):
 
     """
 
-    def __init__(self, model, nb_users, nb_actions, state_size, gamma=.99):
-        self.model = model
+    def __init__(self, nb_users, nb_actions, state_size):
         self.nb_users = nb_users
         self.nb_actions = nb_actions
         self.state_size = state_size
-        self.gamma = gamma
         self.memory = None
         self.training = True
 
