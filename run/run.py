@@ -1,7 +1,6 @@
 from __future__ import print_function
 import argparse
 import os.path
-import time
 import numpy as np
 
 from keras.models import Sequential
@@ -47,10 +46,7 @@ model.summary()
 agent = DQNAgent(model=model, nb_users=nb_users, nb_actions=nb_actions,
                  state_size=state_size, gamma=.99, eps=1.0, batch_size=32)
 agent.warmup(env, nb_steps=50)
-print("Start training: ")
-t = time.time()
 history = agent.fit(env, nb_steps=nb_steps)
-print("time: {}s".format(time.time() - t))
 
 file_path = "data/history_{}".format(nb_steps)
 if not os.path.exists(file_path):
@@ -63,5 +59,4 @@ if not os.path.exists(file_path):
             f.close()
 
 if args.test > 0:
-    print("Start testing: ")
     agent.test(env, nb_steps=args.test)
