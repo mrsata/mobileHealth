@@ -60,12 +60,12 @@ class Agent(object):
                 self.backward()
                 step += 1
                 if step == checkpoint + nb_steps // 20:
-                    print(step, np.average(self.memory.reshape(-1,
-                                           self.memory.shape[-1]), axis=0)[4])
+                    print(step, np.mean(self.memory.reshape(-1,
+                                        self.memory.shape[-1]), axis=0)[4])
                     checkpoint = step
         except KeyboardInterrupt:
             print("Training interrupted at step:", step)
-        print("duration: {}s".format(time.timeit.default_timer() - start_time))
+        print("duration: {}s".format(timeit.default_timer() - start_time))
         return self.memory
 
     def test(self, env, nb_steps=1000):
@@ -87,8 +87,8 @@ class Agent(object):
                 state = s_new
                 step += 1
                 if step == checkpoint + nb_steps // 20:
-                    print(step, np.average(memory.reshape(-1,
-                                           memory.shape[-1]), axis=0)[4])
+                    print(step, np.mean(memory.reshape(-1, memory.shape[-1]),
+                                        axis=0)[4])
                     checkpoint = step
         except KeyboardInterrupt:
             print("Testing interrupted at step:", step)
