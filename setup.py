@@ -10,5 +10,5 @@ setup(name='mobileHealth',
       url='https://github.com/mrsata/mobileHealth',
       download_url='https://github.com/mrsata/mobileHealth/archive/master.zip',
       license='MIT',
-      install_requires=['numpy', 'keras', 'tensorflow'],
+      install_requires=['keras', 'tensorflow'],
       packages=find_packages())
