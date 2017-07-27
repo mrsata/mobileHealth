@@ -13,7 +13,6 @@ class Env(object):
         self.nb_users = baseline.shape[0]
         self.action_space = np.tile(np.array([0, 1]), (self.nb_users, 1))
         self.state_size = state_size
-        self.use_tanh = use_tanh
         beta = np.array([0.40, 0.25, 0.35, 0.65, 0.10, 0.50, 0.22, 600, 0.15,
                          0.20, 0.32, 0.10, 0.45])
         sigma_beta = 5e-2
