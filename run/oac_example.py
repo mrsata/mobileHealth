@@ -28,7 +28,7 @@ nb_users = 40
 state_size = 3
 learning_rate = 1e-2
 baseline = generate_baseline(nb_users=nb_users)
-env = Env(baseline=baseline, p=state_size)
+env = Env(baseline=baseline, state_size=state_size)
 nb_actions = env.action_space.shape[-1]
 
 agent = OACAgent(nb_users=nb_users, nb_actions=nb_actions,
