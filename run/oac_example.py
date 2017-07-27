@@ -17,7 +17,7 @@ def generate_baseline(nb_users):
     return b
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--nb-steps', type=int, default=2)
+parser.add_argument('--nb-steps', type=int, default=1000)
 parser.add_argument('--test', type=int, default=0)
 parser.add_argument('--weights', type=str, default=None)
 args = parser.parse_args()
@@ -32,7 +32,7 @@ env = Env(baseline=baseline, p=state_size)
 nb_actions = env.action_space.shape[-1]
 
 agent = OACAgent(nb_users=nb_users, nb_actions=nb_actions,
-                 state_size=state_size, gamma=0, zetaC=.1, zetaA=.1)
+                 state_size=state_size, gamma=0, zetaC=.1, zetaA=.1, valBnd=10)
 history = agent.fit(env, nb_steps=nb_steps)
 
 file_path = "data/oac_{}".format(nb_steps)
@@ -43,7 +43,7 @@ if not os.path.exists(file_path):
             for j in range(len(history[i])):
                 f.write(", ".join(map(str, history[i, j, :5])) + "\n")
             f.write("*" * 79 + '\n')
-    f.close()
+        f.close()
 
 if args.test > 0:
     agent.test(env, nb_steps=args.test)

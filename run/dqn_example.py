@@ -56,7 +56,7 @@ if not os.path.exists(file_path):
             for j in range(len(history[i])):
                 f.write(", ".join(map(str, history[i, j, :5])) + "\n")
             f.write("*" * 79 + '\n')
-            f.close()
+        f.close()
 
 if args.test > 0:
     agent.test(env, nb_steps=args.test)
