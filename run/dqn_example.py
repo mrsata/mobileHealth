@@ -1,4 +1,5 @@
 from __future__ import print_function
+from subprocess import call
 import argparse
 import os.path
 import numpy as np
@@ -48,6 +49,8 @@ agent = DQNAgent(model=model, nb_users=nb_users, nb_actions=nb_actions,
 agent.warmup(env, nb_steps=50)
 history = agent.fit(env, nb_steps=nb_steps)
 
+if not os.path.exists("data"):
+    call("mkdir data", shell=True)
 file_path = "data/dqn_{}".format(nb_steps)
 if not os.path.exists(file_path):
     with open(file_path, 'w') as f:
